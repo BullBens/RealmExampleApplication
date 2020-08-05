@@ -15,16 +15,16 @@ export const MainStackNavigator = () => {
           headerShown: true,
           title: 'Realm',
         }}
-        component={Main}
-        name={'Main'}
+        component={Chat}
+        name={'Chat'}
       />
       <MainStack.Screen
         options={{
           headerShown: true,
           title: 'Realm',
         }}
-        component={Chat}
-        name={'Chat'}
+        component={Main}
+        name={'Main'}
       />
     </MainStack.Navigator>
   );

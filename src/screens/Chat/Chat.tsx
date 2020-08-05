@@ -46,7 +46,7 @@ const Chat: React.FC<TProps> = ({}) => {
               properties: {
                 _id: 'objectId',
                 _partitionKey: 'string',
-                // userIdentity: 'string',
+                userIdentity: 'string',
                 text: 'string?',
               },
               primaryKey: '_id',
@@ -58,8 +58,8 @@ const Chat: React.FC<TProps> = ({}) => {
           },
         };
         let realm = await Realm.open(config);
-        setMessages(realm.objects('messages').sorted('_id'));
         setRealm(realm);
+        setMessages(realm.objects('messages').sorted('_id'));
       })
       .catch((err) => {
         console.log(`Error: ${JSON.stringify(err)}`);
@@ -69,12 +69,12 @@ const Chat: React.FC<TProps> = ({}) => {
   }, []);
 
   useEffect(() => {
-    if (realm != null && refScrollView) {
+    if (realm) {
       realm.addListener('change', () => {
         setMessages(realm.objects('messages').sorted('_id'));
       });
     }
-  }, [realm, refScrollView]);
+  }, [realm]);
 
   useEffect(() => {
     refScrollView.current?.scrollToEnd();
@@ -86,17 +86,18 @@ const Chat: React.FC<TProps> = ({}) => {
         _id: new ObjectId(),
         _partitionKey: '',
         text: message,
-        // userIdentity: user?.identity,
+        userIdentity: user?.identity,
       });
     });
     setMessage('');
   }, [message, user]);
 
   const logout = useCallback(() => {
+    user?.logOut();
     realm?.write(() => {
       realm?.close();
     });
-  }, [realm]);
+  }, [realm, user]);
   const clear = useCallback(() => {
     if (realm != null) {
       realm.write(() => {
@@ -115,9 +116,11 @@ const Chat: React.FC<TProps> = ({}) => {
           <>
             <ScrollView ref={refScrollView} style={styles.container}>
               {messages.map((el: any, index: number) => (
-                <Text key={index} style={{color: 'red', fontSize: 20}}>
-                  {el.text}
-                </Text>
+                <View style={{alignItems: el.userIdentity == user?.identity ? 'flex-end' : 'flex-start'}}>
+                  <Text key={index} style={{color: el.userIdentity == user?.identity ? 'red' : 'white', fontSize: 20}}>
+                    {el.text}
+                  </Text>
+                </View>
               ))}
             </ScrollView>
             <View style={styles.createNewUserView}>
